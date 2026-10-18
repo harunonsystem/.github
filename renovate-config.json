@@ -1,0 +1,84 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "harunonsystem shared Renovate preset: one weekly PR for all non-major updates",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigestsToSemver",
+    ":semanticCommits"
+  ],
+  "timezone": "Asia/Tokyo",
+  "schedule": [
+    "before 9am on Monday"
+  ],
+  "minimumReleaseAge": "3 days",
+  "rangeStrategy": "bump",
+  "labels": [
+    "dependencies"
+  ],
+  "automerge": true,
+  "automergeType": "pr",
+  "platformAutomerge": true,
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 0,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "groupName": "all non-major dependencies",
+    "groupSlug": "all-minor-patch"
+  },
+  "vulnerabilityAlerts": {
+    "minimumReleaseAge": "0 days",
+    "schedule": [
+      "at any time"
+    ],
+    "labels": [
+      "security",
+      "dependencies"
+    ],
+    "automerge": false
+  },
+  "packageRules": [
+    {
+      "description": "All non-major updates, including GitHub Actions, in one weekly PR",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest"
+      ],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "GitHub Actions wait longer to avoid compromised releases",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "Playwright package and container image wait together so they release in the same week",
+      "matchPackageNames": [
+        "@playwright/test",
+        "playwright",
+        "mcr.microsoft.com/playwright"
+      ],
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "Major updates need manual review, monthly",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false,
+      "minimumReleaseAge": "14 days",
+      "schedule": [
+        "before 9am on the first day of the month"
+      ],
+      "labels": [
+        "dependencies",
+        "major-update"
+      ]
+    }
+  ]
+}

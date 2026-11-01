@@ -3,7 +3,6 @@
   "description": "harunonsystem shared Renovate preset: one weekly PR for all non-major updates",
   "extends": [
     "config:recommended",
-    "helpers:pinGitHubActionDigestsToSemver",
     ":semanticCommits"
   ],
   "timezone": "Asia/Tokyo",
@@ -79,6 +78,25 @@
         "dependencies",
         "major-update"
       ]
+    },
+    {
+      "description": "Group GitHub Actions major updates into one PR",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "github-actions major",
+      "groupSlug": "github-actions-major"
+    },
+    {
+      "description": "Disable Renovate on template repositories",
+      "matchRepositories": [
+        "harunonsystem/raycast-extension-template",
+        "harunonsystem/wxt-extension-template"
+      ],
+      "enabled": false
     }
   ]
 }

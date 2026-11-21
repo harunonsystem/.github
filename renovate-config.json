@@ -1,7 +1,0 @@
-{
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Compatibility shim for existing repositories extending :renovate-config without extension. Real config lives in renovate-config.jsonc.",
-  "extends": [
-    "local>harunonsystem/.github:renovate-config.jsonc"
-  ]
-}

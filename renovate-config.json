@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "harunonsystem shared Renovate preset: one weekly PR for all non-major updates",
+  "description": "harunonsystem shared Renovate preset: one weekly PR for all non-major updates (actions.lock as SSOT)",
   "extends": [
     "config:recommended",
     ":semanticCommits"
@@ -16,13 +16,11 @@
   ],
   "automerge": true,
   "automergeType": "pr",
-  "platformAutomerge": true,
+  "platformAutomerge": false,
   "prConcurrentLimit": 10,
   "prHourlyLimit": 0,
   "lockFileMaintenance": {
-    "enabled": true,
-    "groupName": "all non-major dependencies",
-    "groupSlug": "all-minor-patch"
+    "enabled": false
   },
   "vulnerabilityAlerts": {
     "minimumReleaseAge": "0 days",
@@ -35,6 +33,19 @@
     ],
     "automerge": false
   },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track pinned gh extensions (e.g. github/gh-actions-lock) in workflows",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.+\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "gh extension install (?<depName>\\S+) --pin (?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "github-releases"
+    }
+  ],
   "packageRules": [
     {
       "description": "All non-major updates, including GitHub Actions, in one weekly PR",
@@ -80,9 +91,13 @@
       ]
     },
     {
-      "description": "Group GitHub Actions major updates into one PR",
+      "description": "Group GitHub Actions major updates into one PR (actions and reusable workflows only)",
       "matchManagers": [
         "github-actions"
+      ],
+      "matchDepTypes": [
+        "action",
+        "workflow"
       ],
       "matchUpdateTypes": [
         "major"

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Enable cooldown-synced weekly lockfile maintenance for npm/pnpm only",
+
+  // npm マネージャ配下に閉じ込めることで、混在リポの Bundler / mise 等には影響させない。
+  // CI が不安定・Approve 必須・automerge: false のリポでは lockfile PR が滞留しやすいため、
+  // 自動マージが回る npm / pnpm リポのみオプトインで extends に追加する。
+  "npm": {
+    // npm / pnpm 側にも 3 日クールダウンを同期し、renovate/stability-days の PENDING 滞留を防ぐ
+    "minimumReleaseAgePackageManagerSync": true,
+    "minimumReleaseAgePackageManager": "3 days",
+    "lockFileMaintenance": {
+      "enabled": true,
+      "schedule": [
+        "before 9am on Monday"
+      ],
+      "automerge": true
+    }
+  }
+}

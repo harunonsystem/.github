@@ -1,0 +1,144 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "harunonsystem shared Renovate preset: one weekly PR for all non-major updates (actions.lock as SSOT)",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits"
+  ],
+
+  // 毎週月曜の朝 9 時前（JST）にまとめて PR を作成
+  "timezone": "Asia/Tokyo",
+  "schedule": [
+    "before 9am on Monday"
+  ],
+
+  // サプライチェーン攻撃対策として、リリースから 3 日経過した版のみ更新対象にする
+  "minimumReleaseAge": "3 days",
+  // package.json 等の範囲指定（^ など）も新バージョンに合わせて更新する
+  "rangeStrategy": "bump",
+  "labels": [
+    "dependencies"
+  ],
+
+  // PR ベースで CI 通過後に自動マージ。
+  // GitHub Free の private リポでは GitHub 側の Auto-merge が使えないため、
+  // platformAutomerge を false にして Renovate 自身がマージする。
+  "automerge": true,
+  "automergeType": "pr",
+  "platformAutomerge": false,
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 0,
+
+  // 共通プリセットでは lockfile 定期更新を無効にする。
+  // Bun / uv / Bundler / mise 等は minimumReleaseAge の同期に未対応で
+  // renovate/stability-days が PENDING のまま PR が滞留するため。
+  // 自動マージが回る npm / pnpm リポのみ :renovate-npm-lockfile.jsonc をオプトインで追加する。
+  "lockFileMaintenance": {
+    "enabled": false
+  },
+
+  // セキュリティ修正はクールダウンやスケジュールを待たず即 PR 作成（手動確認）
+  "vulnerabilityAlerts": {
+    "minimumReleaseAge": "0 days",
+    "schedule": [
+      "at any time"
+    ],
+    "labels": [
+      "security",
+      "dependencies"
+    ],
+    "automerge": false
+  },
+
+  // actions.lock 運用で使う pinned な gh extension（例: github/gh-actions-lock）を
+  // workflow と composite action（.github/actions/*/action.yml）の両方から追跡する
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track pinned gh extensions (e.g. github/gh-actions-lock) in workflows and composite actions",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.+\\.ya?ml$/",
+        "/^\\.github/actions/.+/action\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "gh extension install (?<depName>\\S+) --pin (?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "github-releases"
+    }
+  ],
+
+  "packageRules": [
+    {
+      // 非メジャー更新は GitHub Actions も含めて週 1 本の PR に集約
+      "description": "All non-major updates, including GitHub Actions, in one weekly PR",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest"
+      ],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      // GitHub Actions は乗っ取りリスクを考慮して待機期間を長め（7 日）にする
+      "description": "GitHub Actions wait longer to avoid compromised releases",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      // Playwright パッケージとコンテナイメージのバージョンずれを防ぐため同じ 7 日に揃える
+      "description": "Playwright package and container image wait together so they release in the same week",
+      "matchPackageNames": [
+        "@playwright/test",
+        "playwright",
+        "mcr.microsoft.com/playwright"
+      ],
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      // メジャー更新は月 1 回・14 日待機・手動レビュー必須
+      "description": "Major updates need manual review, monthly",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false,
+      "minimumReleaseAge": "14 days",
+      "schedule": [
+        "before 9am on the first day of the month"
+      ],
+      "labels": [
+        "dependencies",
+        "major-update"
+      ]
+    },
+    {
+      // uses-with の node / pnpm 等が混ざらないよう action と reusable workflow に限定
+      "description": "Group GitHub Actions major updates into one PR (actions and reusable workflows only)",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepTypes": [
+        "action",
+        "workflow"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "github-actions major",
+      "groupSlug": "github-actions-major"
+    },
+    {
+      // テンプレートリポジトリ本体への自動 PR は不要なため無効化
+      "description": "Disable Renovate on template repositories",
+      "matchRepositories": [
+        "harunonsystem/raycast-extension-template",
+        "harunonsystem/wxt-extension-template"
+      ],
+      "enabled": false
+    }
+  ]
+}

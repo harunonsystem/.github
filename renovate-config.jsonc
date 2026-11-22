@@ -19,6 +19,10 @@
   "labels": [
     "dependencies"
   ],
+  "reviewers": [
+    "harunonsystem"
+  ],
+  "assignAutomerge": true,
 
   // PR ベースで CI 通過後に自動マージ。
   // GitHub Free の private リポでは GitHub 側の Auto-merge が使えないため、
